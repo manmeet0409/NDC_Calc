@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earnings Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .calculator-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .calculator-container:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        .btn-calculate {
+            background: linear-gradient(to right, #6366f1, #8b5cf6);
+            transition: all 0.3s ease;
+        }
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+        .btn-reset {
+            transition: all 0.3s ease;
+        }
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.2);
+        }
+        .result-box {
+            background: linear-gradient(to right, #e0e7ff, #c7d2fe);
+            border-left: 4px solid #6366f1;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div class="calculator-container w-full max-w-md rounded-xl overflow-hidden p-6">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-indigo-700 mb-2">Earnings Calculator</h1>
+            <p class="text-gray-600">Calculate your net amount after deductions</p>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <label for="earning" class="block text-sm font-medium text-gray-700 mb-1">
+                    <i class="fas fa-money-bill-wave mr-2 text-indigo-500"></i>Your Earnings
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">$</span>
+                    <input type="number" id="earning" 
+                           class="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200" 
+                           placeholder="Enter your earnings">
+                </div>
+            </div>
+
+            <div>
+                <label for="totalAmount" class="block text-sm font-medium text-gray-700 mb-1">
+                    <i class="fas fa-calculator mr-2 text-indigo-500"></i>Total Amount
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">$</span>
+                    <input type="number" id="totalAmount" 
+                           class="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200" 
+                           placeholder="Enter total amount">
+                </div>
+            </div>
+
+            <div class="flex space-x-4">
+                <button id="calculateBtn" class="btn-calculate flex-1 py-3 px-4 rounded-lg text-white font-semibold flex items-center justify-center">
+                    <i class="fas fa-calculator mr-2"></i> Calculate
+                </button>
+                <button id="resetBtn" class="btn-reset flex-1 py-3 px-4 rounded-lg bg-gray-200 text-gray-700 font-semibold flex items-center justify-center">
+                    <i class="fas fa-redo mr-2"></i> Reset
+                </button>
+            </div>
+
+            <div id="resultContainer" class="result-box p-4 rounded-lg hidden">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-indigo-600"></i> Calculation Result
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">20% of Earnings:</p>
+                        <p id="deductionAmount" class="text-lg font-bold text-indigo-700">$0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Earnings After Deduction:</p>
+                        <p id="earningAfterDeduction" class="text-lg font-bold text-indigo-700">$0.00</p>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-sm text-gray-600">Final Amount:</p>
+                    <p id="finalAmount" class="text-2xl font-bold text-indigo-700">$0.00</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-xs text-gray-500">
+            <p>Formula: (Earning - 20% of Earning) subtracted from Total Amount</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const earningInput = document.getElementById('earning');
+            const totalAmountInput = document.getElementById('totalAmount');
+            const resultContainer = document.getElementById('resultContainer');
+            const deductionAmount = document.getElementById('deductionAmount');
+            const earningAfterDeduction = document.getElementById('earningAfterDeduction');
+            const finalAmount = document.getElementById('finalAmount');
+
+            calculateBtn.addEventListener('click', function() {
+                const earning = parseFloat(earningInput.value);
+                const totalAmount = parseFloat(totalAmountInput.value);
+
+                if (isNaN(earning) || isNaN(totalAmount)) {
+                    alert('Please enter valid numbers for both fields');
+                    return;
+                }
+
+                // Calculate 20% of earning
+                const twentyPercent = earning * 0.2;
+                // Calculate earning after 20% deduction
+                const earningAfterDeductionValue = earning - twentyPercent;
+                // Calculate final amount
+                const finalAmountValue = totalAmount - earningAfterDeductionValue;
+
+                // Display results
+                deductionAmount.textContent = `$${twentyPercent.toFixed(2)}`;
+                earningAfterDeduction.textContent = `$${earningAfterDeductionValue.toFixed(2)}`;
+                finalAmount.textContent = `$${finalAmountValue.toFixed(2)}`;
+
+                // Show result container
+                resultContainer.classList.remove('hidden');
+                resultContainer.classList.add('block');
+            });
+
+            resetBtn.addEventListener('click', function() {
+                earningInput.value = '';
+                totalAmountInput.value = '';
+                resultContainer.classList.remove('block');
+                resultContainer.classList.add('hidden');
+            });
+
+            // Add input validation to prevent negative numbers
+            [earningInput, totalAmountInput].forEach(input => {
+                input.addEventListener('change', function() {
+                    if (parseFloat(this.value) < 0) {
+                        this.value = '';
+                        alert('Please enter a positive number');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
